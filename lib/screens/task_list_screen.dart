@@ -9,6 +9,7 @@ import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../widgets/task_card.dart';
 import 'task_form_screen.dart';
+import '../utils/ui_constants.dart';
 
 enum TaskStatusFilter {
   all,
@@ -41,8 +42,6 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const spacing16 = SizedBox(height: 16);
-
     final tasks = ref.watch(taskProvider);
     final isLoading = ref.watch(taskLoadingProvider);
     final selectedFilter = ref.watch(taskSelectedFilterProvider);
@@ -80,22 +79,56 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Manager'),
+        foregroundColor: const Color(0xFF000080),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFF9933),
+                Colors.white,
+              ],
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(kSpacing16),
           child: Column(
             children: [
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Search tasks by title',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  filled: true,
+                  fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: kCircularBorder12,
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: kCircularBorder12,
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: kCircularBorder12,
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1.5,
+                    ),
                   ),
                 ),
                 onChanged: (value) {
@@ -108,13 +141,13 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                   });
                 },
               ),
-              spacing16,
+              const SizedBox(height: kSpacing16),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: kCircularBorder12,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: kSpacing8),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<TaskStatusFilter>(
                     isExpanded: true,
@@ -144,12 +177,12 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                   ),
                 ),
               ),
-              spacing16,
+              const SizedBox(height: kSpacing16),
               if (isLoading)
                 const LinearProgressIndicator(
                   minHeight: 2,
                 ),
-              if (isLoading) const SizedBox(height: 12),
+              if (isLoading) const SizedBox(height: kSpacing8),
               Expanded(
                 child: isTasksEmpty
                     ? const Center(
@@ -178,7 +211,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                                   blockedByTask.status != TaskStatus.Done;
 
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.only(bottom: kSpacing8),
                                 child: AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 180),
                                   transitionBuilder: (child, animation) =>

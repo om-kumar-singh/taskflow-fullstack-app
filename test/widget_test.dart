@@ -6,14 +6,23 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:task_manager_app/main.dart';
 
 void main() {
   testWidgets('TaskManager app renders', (WidgetTester tester) async {
-    await tester.pumpWidget(const TaskManagerApp());
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: TaskManagerApp(),
+      ),
+    );
+    await tester.pump();
 
     expect(find.text('Task Manager'), findsOneWidget);
-    expect(find.text('Your tasks will show up here.'), findsOneWidget);
+    expect(
+      find.text('No tasks yet. Create your first task!'),
+      findsOneWidget,
+    );
   });
 }

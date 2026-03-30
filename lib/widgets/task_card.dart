@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/task.dart';
+import 'status_chip.dart';
+import '../utils/ui_constants.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
@@ -19,31 +21,29 @@ class TaskCard extends StatelessWidget {
     this.highlightQuery = '',
   });
 
-  Color _statusColor(TaskStatus status) {
+  Color _leftBorderColor(TaskStatus status) {
     switch (status) {
       case TaskStatus.ToDo:
-        return Colors.grey;
+        return Colors.grey.shade400;
       case TaskStatus.InProgress:
-        return Colors.blue;
+        return const Color(0xFFFF9933);
       case TaskStatus.Done:
-        return Colors.green;
+        return const Color(0xFF138808);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const cardRadius = 12.0;
-    const cardPadding = 16.0;
+    const cardPadding = kSpacing16;
 
     final dateText = DateFormat.yMMMd().format(task.dueDate);
-
-    final badgeColor = _statusColor(task.status);
-    final effectiveOpacity = isBlocked ? 0.5 : 1.0;
+    final effectiveOpacity = isBlocked ? 0.55 : 1.0;
     final query = highlightQuery.trim();
 
-    final scale = isBlocked ? 0.99 : 1.0;
-    final elevation = isBlocked ? 1.5 : 2.5;
-    final shadowAlpha = isBlocked ? 0.04 : 0.06;
+    final scale = isBlocked ? 0.985 : 1.0;
+    final elevation = isBlocked ? 1.0 : 2.5;
+    final shadowAlpha = isBlocked ? 0.03 : 0.07;
+    final leftBorderColor = _leftBorderColor(task.status);
 
     return AnimatedOpacity(
       opacity: effectiveOpacity,
@@ -55,57 +55,64 @@ class TaskCard extends StatelessWidget {
         transform: Matrix4.diagonal3Values(scale, scale, 1),
         child: Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(cardRadius),
+            borderRadius: kCircularBorder16,
           ),
           elevation: elevation,
           shadowColor: Colors.black.withValues(alpha: shadowAlpha),
           child: InkWell(
-            borderRadius: BorderRadius.circular(cardRadius),
+            borderRadius: kCircularBorder16,
             onTap: isBlocked ? null : onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(cardPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitle(context, task.title, query),
-                  const SizedBox(height: 8),
-                  Text(
-                    dateText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.black.withValues(alpha: 0.7),
-                        ),
+            child: ClipRRect(
+              borderRadius: kCircularBorder16,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: kCircularBorder16,
+                  border: Border(
+                    left: BorderSide(color: leftBorderColor, width: 5),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(cardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: badgeColor,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          task.status.name,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Colors.white,
-                              ),
+                      _buildTitle(context, task.title, query),
+                      const SizedBox(height: kSpacing8),
+                      Text(
+                        dateText,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const SizedBox(height: kSpacing8),
+                      Row(
+                        children: [
+                          StatusChip(status: task.status),
+                        ],
+                      ),
+                      if (isBlocked) ...[
+                        const SizedBox(height: kSpacing8),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.lock_outline, size: 18),
+                            const SizedBox(width: kSpacing8),
+                            Expanded(
+                              child: Text(
+                                'Blocked by: ${blockedByTitle ?? 'Unknown'}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.black.withValues(alpha: 0.65),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
-                  if (isBlocked) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      'Blocked by: ${blockedByTitle ?? 'Unknown'}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.black.withValues(alpha: 0.6),
-                          ),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -116,12 +123,18 @@ class TaskCard extends StatelessWidget {
 
   Widget _buildTitle(BuildContext context, String title, String query) {
     final baseStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800,
+          fontSize: 16,
         ) ??
-        const TextStyle(fontWeight: FontWeight.w700);
+        const TextStyle(fontWeight: FontWeight.w800, fontSize: 16);
 
     if (query.isEmpty) {
-      return Text(title, style: baseStyle);
+      return Text(
+        title,
+        style: baseStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
     }
 
     final lowerTitle = title.toLowerCase();
@@ -150,7 +163,7 @@ class TaskCard extends StatelessWidget {
         TextSpan(
           text: title.substring(matchIndex, matchIndex + query.length),
           style: baseStyle.copyWith(
-            backgroundColor: Colors.yellow.withValues(alpha: 0.35),
+            backgroundColor: const Color(0xFF000080).withValues(alpha: 0.18),
           ),
         ),
       );
@@ -159,7 +172,11 @@ class TaskCard extends StatelessWidget {
       if (start >= title.length) break;
     }
 
-    return RichText(text: TextSpan(children: spans, style: baseStyle));
+    return Text.rich(
+      TextSpan(children: spans, style: baseStyle),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }
 

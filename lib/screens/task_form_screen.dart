@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../services/task_draft_service.dart';
+import '../utils/ui_constants.dart';
 
 class TaskFormScreen extends ConsumerStatefulWidget {
   final Task? initialTask;
@@ -124,10 +125,26 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.initialTask == null ? 'Create Task' : 'Edit Task'),
+        foregroundColor: const Color(0xFF000080),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFF9933),
+                Colors.white,
+              ],
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(kSpacing16),
           child: Form(
             key: _formKey,
             child: Column(
@@ -137,7 +154,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   controller: _titleController,
                   decoration: const InputDecoration(
                     labelText: 'Title',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: kCircularBorder12),
                   ),
                   textInputAction: TextInputAction.next,
                   onChanged: (_) => setState(() {}),
@@ -147,12 +164,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: kSpacing8),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(
                     labelText: 'Description',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: kCircularBorder12),
                   ),
                   maxLines: 4,
                   onChanged: (_) => setState(() {}),
@@ -162,20 +179,20 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: kSpacing8),
                 _DueDatePickerField(
                   dueDate: _dueDate,
                   onPick: (picked) => setState(() => _dueDate = picked),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: kSpacing8),
                 Container(
                   decoration: BoxDecoration(
                     border:
                         Border.all(color: Colors.black.withValues(alpha: 0.12)),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: kCircularBorder12,
                   ),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: kSpacing8,
                     vertical: 4,
                   ),
                   child: DropdownButtonHideUnderline(
@@ -203,16 +220,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    border:
-                        Border.all(color: Colors.black.withValues(alpha: 0.12)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
+                const SizedBox(height: kSpacing8),
+                InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Blocked By',
+                    border: OutlineInputBorder(
+                      borderRadius: kCircularBorder12,
+                    ),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String?>(
@@ -221,7 +235,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('None'),
+                          child: Text('Select dependency (optional)'),
                         ),
                         ...availableBlockedTasks.map(
                           (t) => DropdownMenuItem<String?>(
@@ -242,12 +256,19 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: kSpacing24),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: kCircularBorder12,
+                    ),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
                   onPressed: isSaving
                       ? null
                       : () async {
                           final nav = Navigator.of(context);
+                          final messenger = ScaffoldMessenger.of(context);
 
                           final valid =
                               _formKey.currentState?.validate() ?? false;
@@ -288,6 +309,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
                           if (!mounted) return;
                           _savedSuccessfully = true;
+
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                widget.initialTask == null
+                                    ? 'Task created'
+                                    : 'Task updated',
+                              ),
+                            ),
+                          );
                           nav.pop();
                         },
                   child: isSaving
@@ -344,7 +375,9 @@ class _DueDatePickerField extends StatelessWidget {
       child: InputDecorator(
         decoration: const InputDecoration(
           labelText: 'Due Date',
-          border: OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
         ),
         child: Row(
           children: [
