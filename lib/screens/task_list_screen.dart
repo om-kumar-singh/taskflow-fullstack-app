@@ -44,6 +44,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     const spacing16 = SizedBox(height: 16);
 
     final tasks = ref.watch(taskProvider);
+    final isLoading = ref.watch(taskLoadingProvider);
     final selectedFilter = ref.watch(taskSelectedFilterProvider);
     final debouncedQuery = ref.watch(taskDebouncedSearchQueryProvider);
     final tasksById = {for (final t in tasks) t.id: t};
@@ -71,6 +72,10 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     final filteredTasks = tasks.where((t) {
       return matchesFilter(t) && matchesSearch(t);
     }).toList(growable: false);
+
+    final isTasksEmpty = tasks.isEmpty;
+    final isFilteredEmpty = !isTasksEmpty && filteredTasks.isEmpty;
+    final hasSearchText = normalizedQuery.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -140,44 +145,67 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                 ),
               ),
               spacing16,
+              if (isLoading)
+                const LinearProgressIndicator(
+                  minHeight: 2,
+                ),
+              if (isLoading) const SizedBox(height: 12),
               Expanded(
-                child: filteredTasks.isEmpty
-                    ? const Center(child: Text('No tasks found.'))
-                    : ListView.builder(
-                        itemCount: filteredTasks.length,
-                        itemBuilder: (context, index) {
-                          final task = filteredTasks[index];
-                          final blockedByTaskId = task.blockedByTaskId;
-
-                          final blockedByTask =
-                              blockedByTaskId == null
-                                  ? null
-                                  : tasksById[blockedByTaskId];
-
-                          final isBlocked = blockedByTask != null &&
-                              blockedByTask.status != TaskStatus.Done;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: TaskCard(
-                              task: task,
-                              isBlocked: isBlocked,
-                              blockedByTitle: blockedByTask?.title,
-                              highlightQuery: debouncedQuery,
-                              onTap: () {
-                                // Edit screen will be implemented in Step 6.
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => TaskFormScreen(
-                                      initialTask: task,
-                                    ),
-                                  ),
-                                );
-                              },
+                child: isTasksEmpty
+                    ? const Center(
+                        child: Text('No tasks yet. Create your first task!'),
+                      )
+                    : isFilteredEmpty
+                        ? Center(
+                            child: Text(
+                              hasSearchText
+                                  ? 'No tasks match your search'
+                                  : 'No tasks found.',
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredTasks.length,
+                            itemBuilder: (context, index) {
+                              final task = filteredTasks[index];
+                              final blockedByTaskId = task.blockedByTaskId;
+
+                              final blockedByTask =
+                                  blockedByTaskId == null
+                                      ? null
+                                      : tasksById[blockedByTaskId];
+
+                              final isBlocked = blockedByTask != null &&
+                                  blockedByTask.status != TaskStatus.Done;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 180),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(opacity: animation, child: child),
+                                  child: TaskCard(
+                                    key: ValueKey(
+                                      '${task.id}_${selectedFilter.name}_${debouncedQuery.trim()}',
+                                    ),
+                                    task: task,
+                                    isBlocked: isBlocked,
+                                    blockedByTitle: blockedByTask?.title,
+                                    highlightQuery: debouncedQuery,
+                                    onTap: () {
+                                      // Edit screen is implemented in Step 6.
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => TaskFormScreen(
+                                            initialTask: task,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
               ),
             ],
           ),

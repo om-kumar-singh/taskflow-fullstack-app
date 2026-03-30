@@ -41,62 +41,72 @@ class TaskCard extends StatelessWidget {
     final effectiveOpacity = isBlocked ? 0.5 : 1.0;
     final query = highlightQuery.trim();
 
-    return Opacity(
+    final scale = isBlocked ? 0.99 : 1.0;
+    final elevation = isBlocked ? 1.5 : 2.5;
+    final shadowAlpha = isBlocked ? 0.04 : 0.06;
+
+    return AnimatedOpacity(
       opacity: effectiveOpacity,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(cardRadius),
-        ),
-        elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.06),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(cardRadius),
-          onTap: isBlocked ? null : onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(cardPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitle(context, task.title, query),
-                const SizedBox(height: 8),
-                Text(
-                  dateText,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.black.withValues(alpha: 0.7),
-                      ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: badgeColor,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        task.status.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-                if (isBlocked) ...[
-                  const SizedBox(height: 10),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        transform: Matrix4.diagonal3Values(scale, scale, 1),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(cardRadius),
+          ),
+          elevation: elevation,
+          shadowColor: Colors.black.withValues(alpha: shadowAlpha),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(cardRadius),
+            onTap: isBlocked ? null : onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(cardPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTitle(context, task.title, query),
+                  const SizedBox(height: 8),
                   Text(
-                    'Blocked by: ${blockedByTitle ?? 'Unknown'}',
+                    dateText,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.black.withValues(alpha: 0.6),
+                          color: Colors.black.withValues(alpha: 0.7),
                         ),
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeColor,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          task.status.name,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (isBlocked) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Blocked by: ${blockedByTitle ?? 'Unknown'}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.black.withValues(alpha: 0.6),
+                          ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
