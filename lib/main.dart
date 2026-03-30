@@ -1,7 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const TaskManagerApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  await Hive.openBox('tasks');
+
+  runApp(const ProviderScope(child: TaskManagerApp()));
 }
 
 class TaskManagerApp extends StatelessWidget {
