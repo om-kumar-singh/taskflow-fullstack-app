@@ -4,7 +4,7 @@
 
 ## Demo
 
-TODO: Add a demo video/link here (replace the placeholder).
+https://github.com/user-attachments/assets/ff7237db-ba3f-4d18-8af9-d633bbb1ad92
 
 ## Features (implemented)
 
