@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 
 import 'models/task.dart';
+import 'screens/task_list_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +38,7 @@ class TaskManagerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Task Manager',
       theme: theme,
-      home: const TaskManagerPlaceholderScreen(),
+      home: const TaskListScreen(),
     );
   }
 }
